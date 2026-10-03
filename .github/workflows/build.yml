@@ -1,0 +1,26 @@
+name: Build Gku Type
+on:
+  workflow_dispatch:
+  push:
+    paths: ['gkutype.zip']
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: unzip -o gkutype.zip -d project
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+      - run: cd project && gradle assembleRelease --no-daemon
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Gku Type build ${{ github.run_number }}
+          files: project/app/build/outputs/apk/release/app-release.apk
